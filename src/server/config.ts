@@ -1,20 +1,34 @@
-
 import type { C2DClusterInfo } from '../@types/C2D.js'
 import { C2DClusterType } from '../@types/C2D.js'
 import { createFromPrivKey } from '@libp2p/peer-id-factory'
 import { keys } from '@libp2p/crypto'
 
-import { DEFAULT_RATE_LIMIT_PER_SECOND, defaultBootstrapAddresses, ENVIRONMENT_VARIABLES, EnvVariable, knownUnsafeURLs } from '../utils/constants.js'
+import {
+  DEFAULT_RATE_LIMIT_PER_SECOND,
+  defaultBootstrapAddresses,
+  ENVIRONMENT_VARIABLES,
+  EnvVariable,
+  knownUnsafeURLs
+} from '../utils/constants.js'
 
 import { getAddress, Wallet } from 'ethers'
-import { FeeAmount, FeeStrategy, FeeTokens, OceanNodeConfig, OceanNodeDockerConfig, RPCS } from '../@types/OceanNodeP2PServer.js'
-import { DenyList, OceanNodeKeys } from '../@types/p2p.js'
+import {
+  FeeAmount,
+  FeeStrategy,
+  FeeTokens,
+  OceanNodeConfig,
+  OceanNodeDockerConfig,
+  RPCS
+} from '../@types/serverP2P.js'
 import { hexStringToByteArray } from '../utils/conversions.js'
 import { GENERIC_EMOJIS, LOG_LEVELS_STR, getLoggerLevelEmoji } from '../logging/Logger.js'
 import { CONFIG_LOGGER } from '../logging/common.js'
 import { create256Hash } from '../utils/utils.js'
-import { getOceanArtifactsAdresses, OCEAN_ARTIFACTS_ADDRESSES_PER_CHAIN } from './address.js'
-
+import {
+  getOceanArtifactsAdresses,
+  OCEAN_ARTIFACTS_ADDRESSES_PER_CHAIN
+} from './address.js'
+import { DenyList, OceanNodeKeys } from '../@types/commonP2P.js'
 
 // usefull for lazy loading and avoid boilerplate on other places
 let previousConfiguration: OceanNodeConfig = null

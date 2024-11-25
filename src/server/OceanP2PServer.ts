@@ -1,5 +1,4 @@
 // import diff from 'hyperdiff'
-import EventEmitter from 'node:events'
 import clone from 'lodash.clonedeep'
 
 import {
@@ -39,8 +38,10 @@ import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 // import { EVENTS } from '../utils/constants.js'
 import { cidFromRawString } from '../utils/conversions.js'
 import { P2P_LOGGER } from '../logging/common.js'
-import { OceanNodeConfig, P2PCommandResponse } from '../@types/OceanNodeP2PServer.js'
 import { GENERIC_EMOJIS, LOG_LEVELS_STR } from '../logging/Logger.js'
+import { OceanP2P } from '../common/OceanP2P.js'
+import { OceanNodeConfig } from '../@types/serverP2P.js'
+import { P2PCommandResponse } from '../@types/commonP2P.js'
 // import { getIPv4, getIPv6 } from '../../utils/ip.js'
 
 const DEFAULT_OPTIONS = {
@@ -60,17 +61,7 @@ type DDOCache = {
 
 let index = 0
 
-export class OceanP2P extends EventEmitter {
-  _libp2p: any
-  _topic: string
-  _options: any
-  _peers: any[]
-  _connections: {}
-  _protocol: string
-  _publicAddress: string
-  _publicKey: Uint8Array
-  _privateKey: Uint8Array
-  _analyzeRemoteResponse: Transform
+export class OceanP2PServer extends OceanP2P {
   _pendingAdvertise: string[] = []
   private _ddoDHT: DDOCache
   private _handleMessage: any
@@ -426,14 +417,6 @@ export class OceanP2P extends EventEmitter {
     return null
   }
 
-  async getAllPeerStore() {
-    const s = await this._libp2p.peerStore.all()
-    return s
-    // for await (const peer of this._libp2p.peerRouting.getClosestPeers(s[0].id.toString())) {
-    //  console.log(peer.id, peer.multiaddrs)
-    // }
-  }
-
   async getNetworkingStats() {
     const ret: any = {}
     ret.binds = await this._libp2p.components.addressManager.getListenAddrs()
@@ -480,11 +463,6 @@ export class OceanP2P extends EventEmitter {
     }
 
     return peers
-  }
-
-  async hasPeer(peer: any) {
-    const s = await this._libp2p.peerStore.all()
-    return Boolean(s.find((p: any) => p.toString() === peer.toString()))
   }
 
   async getPeerDetails(peerName: string) {

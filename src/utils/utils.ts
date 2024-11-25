@@ -1,14 +1,15 @@
+// eslint-disable-next-line camelcase
 import is_ip_private from 'private-ip'
 import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 import dns from 'dns'
-import { NodeIpAndDns } from '../@types/monitor.js'
 import { keys } from '@libp2p/crypto'
 import { createFromPrivKey } from '@libp2p/peer-id-factory'
 import { Wallet } from 'ethers'
-import { OceanNodeKeys } from '../@types/p2p.js'
 import { hexStringToByteArray } from './conversions.js'
 import crypto from 'crypto'
+import { OceanNodeKeys } from '../@types/commonP2P.js'
+import { NodeIpAndDns } from '../@types/clientP2P.js'
 
 export function create256Hash(input: string): string {
   const result = crypto.createHash('sha256').update(input).digest('hex')

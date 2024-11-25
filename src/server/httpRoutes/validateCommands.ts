@@ -1,4 +1,4 @@
-import { P2PCommandResponse } from '../../@types/OceanNodeP2PServer'
+import { P2PCommandResponse } from '../../@types/commonP2P'
 import { PROTOCOL_COMMANDS, SUPPORTED_PROTOCOL_COMMANDS } from '../../utils/constants'
 import { Command } from '../commands'
 import { ReadableString } from '../handlers'

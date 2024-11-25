@@ -1,24 +1,4 @@
-import { Stream } from 'stream'
-export interface DenyList {
-  peers: string[]
-  ips: string[]
-}
-
-export interface OceanNodeKeys {
-  peerId: any
-  publicKey: any
-  privateKey: any
-  ethAddress: string
-}
-export interface P2PStatusResponse {
-  httpStatus: number
-  error?: string
-  headers?: any
-}
-export interface P2PCommandResponse {
-  status: P2PStatusResponse
-  stream: Stream | null
-}
+import { OceanNodeKeys } from './commonP2P'
 
 export interface OceanNodeP2PConfig {
   bootstrapNodes: string[]
@@ -90,4 +70,21 @@ export interface OceanNodeStatus {
 export interface OceanNodeConfig {
   keys: OceanNodeKeys
   p2pConfig: OceanNodeP2PConfig | null
+}
+
+export interface NodeIpAndDns {
+  ip: string
+  port: number
+  dns: string
+  relay: boolean
+  relayNode: string
+}
+
+export interface NodeCheckResult {
+  peerId: string
+  ipAddrs: NodeIpAndDns
+  success: boolean
+  errorCause: string
+  status: string
+  deltaTime: number
 }

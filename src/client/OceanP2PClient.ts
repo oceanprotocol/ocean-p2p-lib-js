@@ -20,7 +20,6 @@ import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
 import { kadDHT, passthroughMapper } from '@libp2p/kad-dht'
 
-import { Transform } from 'stream'
 // eslint-disable-next-line camelcase
 import is_ip_private from 'private-ip'
 import ip from 'ip'
@@ -33,22 +32,11 @@ import { NodeIpAndDns, NodeCheckResult } from '../@types/monitor'
 import { defaultBootstrapAddresses } from '../utils/constants'
 import { Ed25519PeerId, RSAPeerId, Secp256k1PeerId, URLPeerId } from '@libp2p/interface'
 import { extractPublicIp, getPeerIdFromPrivateKey } from '../utils/utils'
+import { OceanP2P } from '../common/OceanP2P'
 
 EventEmitter.defaultMaxListeners = 500
 
-export class OceanP2P extends EventEmitter {
-  _libp2p: any
-  _topic: string
-  _options: any
-  _peers: any[]
-  _connections: {}
-  _protocol: string
-  _publicAddress: string
-  _publicKey: Uint8Array
-  _privateKey: Uint8Array
-  _analyzeRemoteResponse: Transform
-  _pendingAdvertise: string[] = []
-  _config: OceanNodeConfig
+export class OceanP2PClient extends OceanP2P {
   // constructor() {
   //   super()
   // }
@@ -283,13 +271,7 @@ export class OceanP2P extends EventEmitter {
     return null
   }
 
-  async getAllPeerStore() {
-    const s = await this._libp2p.peerStore.all()
-    return s
-    // for await (const peer of this._libp2p.peerRouting.getClosestPeers(s[0].id.toString())) {
-    //  console.log(peer.id, peer.multiaddrs)
-    // }
-  }
+
 
   async getNetworkingStats() {
     const ret: any = {}
@@ -341,11 +323,6 @@ export class OceanP2P extends EventEmitter {
 
     console.log('Got ' + Object.keys(allPeers).length + ' peers from peerStore')
     return allPeers
-  }
-
-  async hasPeer(peer: any) {
-    const s = await this._libp2p.peerStore.all()
-    return Boolean(s.find((p: any) => p.toString() === peer.toString()))
   }
 
   async sendTo(
@@ -512,6 +489,7 @@ export class OceanP2P extends EventEmitter {
             first = false
             try {
               const str = uint8ArrayToString(chunk.subarray()) // Obs: we need to specify the length of the subarrays
+              // eslint-disable-next-line no-unused-vars
               const decoded = JSON.parse(str)
             } catch (e) {
               console.log(e)

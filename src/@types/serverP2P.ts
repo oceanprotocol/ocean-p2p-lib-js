@@ -1,16 +1,6 @@
-import { Stream } from 'stream'
-import { OceanNodeKeys } from './p2p'
 import { C2DClusterInfo } from './C2D'
+import { DenyList, OceanNodeKeys } from './commonP2P'
 
-export interface P2PStatusResponse {
-  httpStatus: number
-  error?: string
-  headers?: any
-}
-export interface P2PCommandResponse {
-  status: P2PStatusResponse
-  stream: Stream | null
-}
 export interface NetworkEvent {
   type: string
   text: string
@@ -90,10 +80,6 @@ export interface OceanNodeP2PConfig {
   autoDialConcurrency: number
   maxPeerAddrsToDial: number
   autoDialInterval: number
-}
-export interface DenyList {
-  peers: string[]
-  ips: string[]
 }
 
 export interface OceanNodeConfig {

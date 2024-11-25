@@ -1,3 +1,4 @@
+import { P2PCommandResponse } from '../@types/commonP2P'
 import {
   ArweaveFileObject,
   BaseFileObject,
@@ -6,7 +7,6 @@ import {
   IpfsFileObject,
   UrlFileObject
 } from '../@types/fileObject'
-import { P2PCommandResponse } from '../@types/OceanNodeP2PServer'
 import { ValidateParams } from './httpRoutes/validateCommands'
 
 export interface Command {
