@@ -1,8 +1,6 @@
 import { CommonOceanNodeConfig, OceanNodeKeys } from './commonP2P'
 
-export interface OceanNodeP2PClientConfig extends CommonOceanNodeConfig {
-  
-}
+export interface OceanNodeP2PClientConfig extends CommonOceanNodeConfig {}
 
 export interface OceanNodeProvider {
   chainId: string

@@ -66,7 +66,7 @@ export class OceanP2PServer extends OceanP2P {
   private _upnp_interval: NodeJS.Timeout
   private _ip_discovery_interval: NodeJS.Timeout
   private _idx: number
- 
+
   constructor(config: OceanNodeConfig) {
     super()
     this._config = config
@@ -109,8 +109,7 @@ export class OceanP2PServer extends OceanP2P {
     })
     // listen for indexer events and advertise did
 
-
-    //TBD clarify
+    // TBD clarify
     // INDEXER_DDO_EVENT_EMITTER.addListener(EVENTS.METADATA_CREATED, (did) => {
     //   P2P_LOGGER.info(`Listened "${EVENTS.METADATA_CREATED}"`)
     //   this.advertiseDid(did)
