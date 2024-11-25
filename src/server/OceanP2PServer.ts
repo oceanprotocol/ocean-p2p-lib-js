@@ -31,9 +31,6 @@ import { kadDHT, passthroughMapper } from '@libp2p/kad-dht'
 // import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 
 import { Transform } from 'stream'
-// eslint-disable-next-line camelcase
-import is_ip_private from 'private-ip'
-import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 // import { EVENTS } from '../utils/constants.js'
 import { cidFromRawString } from '../utils/conversions.js'
@@ -164,50 +161,6 @@ export class OceanP2PServer extends OceanP2P {
 
   handleSubscriptionCHange(details: any) {
     P2P_LOGGER.debug('subscription-change:' + details.detail)
-  }
-
-  shouldAnnounce(addr: any) {
-    try {
-      const maddr = multiaddr(addr)
-      // always filter loopback
-      if (ip.isLoopback(maddr.nodeAddress().address)) {
-        // disabled logs because of flooding
-        // P2P_LOGGER.debug('Deny announcement of loopback ' + maddr.nodeAddress().address)
-        return false
-      }
-      // check filters
-      for (const filter of this._config.p2pConfig.filterAnnouncedAddresses) {
-        if (ip.cidrSubnet(filter).contains(maddr.nodeAddress().address)) {
-          // disabled logs because of flooding
-          // P2P_LOGGER.debug(
-          //  'Deny announcement of filtered ' +
-          //    maddr.nodeAddress().address +
-          //    '(belongs to ' +
-          //    filter +
-          //    ')'
-          // )
-          return false
-        }
-      }
-      if (
-        this._config.p2pConfig.announcePrivateIp === false &&
-        (is_ip_private(maddr.nodeAddress().address) ||
-          ip.isPrivate(maddr.nodeAddress().address))
-      ) {
-        // disabled logs because of flooding
-        // P2P_LOGGER.debug(
-        //  'Deny announcement of private address ' + maddr.nodeAddress().address
-        // )
-        return false
-      } else {
-        // disabled logs because of flooding
-        // P2P_LOGGER.debug('Allow announcement of ' + maddr.nodeAddress().address)
-        return true
-      }
-    } catch (e) {
-      // we reach this part when having circuit relay. this is fine
-      return true
-    }
   }
 
   async createNode(config: OceanNodeConfig): Promise<Libp2p | null> {
@@ -415,28 +368,6 @@ export class OceanP2PServer extends OceanP2P {
       )
     }
     return null
-  }
-
-  async getNetworkingStats() {
-    const ret: any = {}
-    ret.binds = await this._libp2p.components.addressManager.getListenAddrs()
-    ret.listen = await this._libp2p.components.transportManager.getAddrs()
-    ret.observing = await this._libp2p.components.addressManager.getObservedAddrs()
-    ret.announce = await this._libp2p.components.addressManager.getAnnounceAddrs()
-    ret.connections = await this._libp2p.getConnections()
-    return ret
-  }
-
-  async getRunningOceanPeers() {
-    return await this.getOceanPeers(true, false)
-  }
-
-  async getKnownOceanPeers() {
-    return await this.getOceanPeers(false, true)
-  }
-
-  async getAllOceanPeers() {
-    return await this.getOceanPeers(true, true)
   }
 
   async getOceanPeers(running: boolean = true, known: boolean = true) {
@@ -784,19 +715,6 @@ export class OceanP2PServer extends OceanP2P {
       lastUpdateTime: ddo.metadata.updated,
       provider: this.getPeerId()
     })
-  }
-
-  /**
-   * Is the message intended for this peer or we need to connect to another one?
-   * @param targetPeerID  the target node id
-   * @returns true if the message is intended for this peer, false otherwise
-   */
-  isTargetPeerSelf(targetPeerID: string): boolean {
-    return targetPeerID === this.getPeerId()
-  }
-
-  getPeerId(): string {
-    return this._config.keys.peerId.toString()
   }
 
   getDDOCache(): DDOCache {

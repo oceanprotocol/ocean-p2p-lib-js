@@ -9,6 +9,7 @@ import { noise } from '@chainsafe/libp2p-noise'
 import { mdns } from '@libp2p/mdns'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { peerIdFromString } from '@libp2p/peer-id'
+import { Transform } from 'stream'
 import { pipe } from 'it-pipe'
 // import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
@@ -19,20 +20,17 @@ import { identify } from '@libp2p/identify'
 import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
 import { kadDHT, passthroughMapper } from '@libp2p/kad-dht'
-
-// eslint-disable-next-line camelcase
-import is_ip_private from 'private-ip'
-import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 // import { getIPv4, getIPv6 } from '../../utils/ip.js'
 import { ethers } from 'ethers'
 
-import { OceanNodeConfig, P2PCommandResponse } from '../@types/p2p'
-import { NodeIpAndDns, NodeCheckResult } from '../@types/monitor'
+import { OceanNodeConfig } from '../@types/p2p'
 import { defaultBootstrapAddresses } from '../utils/constants'
 import { Ed25519PeerId, RSAPeerId, Secp256k1PeerId, URLPeerId } from '@libp2p/interface'
 import { extractPublicIp, getPeerIdFromPrivateKey } from '../utils/utils'
 import { OceanP2P } from '../common/OceanP2P'
+import { NodeCheckResult } from '../@types/clientP2P'
+import { P2PCommandResponse } from '../@types/commonP2P'
 
 EventEmitter.defaultMaxListeners = 500
 
@@ -101,38 +99,6 @@ export class OceanP2PClient extends OceanP2P {
         callback(null, chunk.toString().toUpperCase())
       }
     })
-  }
-
-  shouldAnnounce(addr: any) {
-    try {
-      const maddr = multiaddr(addr)
-      // always filter loopback
-      if (ip.isLoopback(maddr.nodeAddress().address)) return false
-      // check filters
-      for (const filter of this._config.p2pConfig.filterAnnouncedAddresses) {
-        if (ip.cidrSubnet(filter).contains(maddr.nodeAddress().address)) {
-          return false
-        }
-      }
-      if (
-        this._config.p2pConfig.announcePrivateIp === false &&
-        (is_ip_private(maddr.nodeAddress().address) ||
-          ip.isPrivate(maddr.nodeAddress().address))
-      ) {
-        // disabled logs because of flooding
-        // P2P_LOGGER.debug(
-        //  'Deny announcement of private address ' + maddr.nodeAddress().address
-        // )
-        return false
-      } else {
-        // disabled logs because of flooding
-        // P2P_LOGGER.debug('Allow announcement of ' + maddr.nodeAddress().address)
-        return true
-      }
-    } catch (e) {
-      // we reach this part when having circuit relay. this is fine
-      return true
-    }
   }
 
   async createNode(config: OceanNodeConfig): Promise<Libp2p | null> {
@@ -271,30 +237,6 @@ export class OceanP2PClient extends OceanP2P {
     return null
   }
 
-
-
-  async getNetworkingStats() {
-    const ret: any = {}
-    ret.binds = await this._libp2p.components.addressManager.getListenAddrs()
-    ret.listen = await this._libp2p.components.transportManager.getAddrs()
-    ret.observing = await this._libp2p.components.addressManager.getObservedAddrs()
-    ret.announce = await this._libp2p.components.addressManager.getAnnounceAddrs()
-    ret.connections = await this._libp2p.getConnections()
-    return ret
-  }
-
-  async getRunningOceanPeers() {
-    return await this.getOceanPeers(true, false)
-  }
-
-  async getKnownOceanPeers() {
-    return await this.getOceanPeers(false, true)
-  }
-
-  async getAllOceanPeers() {
-    return await this.getOceanPeers(true, true)
-  }
-
   async getOceanPeers(
     running: boolean = true,
     known: boolean = true
@@ -392,19 +334,6 @@ export class OceanP2PClient extends OceanP2P {
     }
 
     return response
-  }
-
-  /**
-   * Is the message intended for this peer or we need to connect to another one?
-   * @param targetPeerID  the target node id
-   * @returns true if the message is intended for this peer, false otherwise
-   */
-  isTargetPeerSelf(targetPeerID: string): boolean {
-    return targetPeerID === this.getPeerId()
-  }
-
-  getPeerId(): string {
-    return this._config.keys.peerId.toString()
   }
 
   async checkPeer(peer: string, addrs: any, deltaTime: number): Promise<NodeCheckResult> {
