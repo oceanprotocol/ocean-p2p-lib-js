@@ -21,7 +21,7 @@
     "@libp2p/identify": "^2.1.1",
     "@libp2p/interface": "^1.6.0",
     "@libp2p/interface-address-manager": "^3.0.1",
-    "@libp2p/kad-dht": "^12.1.1",
+    "@libp2p/kad-dht": "^12.1.5",
     "@libp2p/mdns": "^10.1.1",
     "@libp2p/peer-id": "^4.1.4",
     "@libp2p/peer-id-factory": "^4.1.4",
@@ -36,7 +36,9 @@
     "libp2p": "^2.3.1",
     "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",
-    "private-ip": "^3.0.2"
+    "private-ip": "^3.0.2",
+    "winston": "^3.17.0",
+    "winston-transport": "^4.9.0"
   },
   "devDependencies": {
     "@types/ip": "^1.1.3"
