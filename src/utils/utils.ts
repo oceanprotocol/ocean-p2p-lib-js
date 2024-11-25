@@ -1,4 +1,3 @@
-// eslint-disable-next-line camelcase
 import is_ip_private from 'private-ip'
 import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
@@ -9,6 +8,12 @@ import { createFromPrivKey } from '@libp2p/peer-id-factory'
 import { Wallet } from 'ethers'
 import { OceanNodeKeys } from '../@types/p2p.js'
 import { hexStringToByteArray } from './conversions.js'
+import crypto from 'crypto'
+
+export function create256Hash(input: string): string {
+  const result = crypto.createHash('sha256').update(input).digest('hex')
+  return '0x' + result
+}
 
 export async function getPeerIdFromPrivateKey(
   privateKey: string

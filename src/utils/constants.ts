@@ -1,4 +1,4 @@
-import { Hashes } from '../@types/blockchain'
+import { Hashes } from "../@types/OceanNodeP2PServer"
 
 // Add all the supported commands
 export const PROTOCOL_COMMANDS = {

@@ -11,6 +11,13 @@ export interface P2PCommandResponse {
   status: P2PStatusResponse
   stream: Stream | null
 }
+export interface NetworkEvent {
+  type: string
+  text: string
+}
+export interface Hashes {
+  [hash: string]: NetworkEvent
+}
 export interface OceanNodeDockerConfig {
   socketPath?: string
   protocol?: string

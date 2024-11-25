@@ -3,7 +3,9 @@ import Transport from 'winston-transport'
 const EXCEPTIONS_HANDLER = 'exceptions.log'
 export const LOGGER_MODULE_NAMES = {
   P2P: 'p2p',
-  ALL_COMBINED: 'all'
+  ALL_COMBINED: 'all',
+  CONFIG:"config",
+  CORE:"core"
 }
 export const LOG_LEVELS_NUM = {
   error: 0,

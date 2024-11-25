@@ -1,14 +1,13 @@
 import { pipe } from 'it-pipe'
 import { Readable } from 'stream'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-
-import { P2P_LOGGER } from '../../utils/logging/common.js'
-import { Command } from '../../@types/commands.js'
-import { P2PCommandResponse } from '../../@types/OceanNode'
-import { GENERIC_EMOJIS, LOG_LEVELS_STR } from '../../utils/logging/Logger.js'
+import { P2PCommandResponse } from '../@types/p2p.js'
+import { P2P_LOGGER } from '../logging/common.js'
+import { LOG_LEVELS_STR, GENERIC_EMOJIS } from '../logging/Logger.js'
+import { Command } from './commands.js'
+import { getConfiguration } from './config.js'
+import { Handler } from './handler.js'
 import StreamConcat from 'stream-concat'
-import { Handler } from '../core/handler/handler.js'
-import { getConfiguration } from '../../utils/index.js'
 
 export class ReadableString extends Readable {
   private sent = false
