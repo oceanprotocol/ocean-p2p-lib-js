@@ -43,25 +43,3 @@ export interface NodeStatus {
   supportedStorage: any
   version: string
 }
-
-export interface GeneralStatus {
-  id: number
-  week: number
-  totalUptime: number
-  lastRun: number
-}
-
-export interface NodeWeeklyUptime {
-  nodeId: string
-  week: number
-  address: string
-  uptime: number
-  lastCheck: number
-}
-
-export interface PeerTask {
-  peerId: string
-  multiaddrs: string[]
-  deltaTime: number
-  currentWeek: number
-}
