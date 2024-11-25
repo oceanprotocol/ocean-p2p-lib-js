@@ -24,12 +24,11 @@ import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 // import { getIPv4, getIPv6 } from '../../utils/ip.js'
 import { ethers } from 'ethers'
 
-import { OceanNodeConfig } from '../@types/p2p'
-import { defaultBootstrapAddresses } from '../utils/constants'
+import { defaultBootstrapAddresses } from '../utils/constants.js'
 import { Ed25519PeerId, RSAPeerId, Secp256k1PeerId, URLPeerId } from '@libp2p/interface'
-import { extractPublicIp, getPeerIdFromPrivateKey } from '../utils/utils'
-import { OceanP2P } from '../common/OceanP2P'
-import { NodeCheckResult } from '../@types/clientP2P'
+import { extractPublicIp, getPeerIdFromPrivateKey } from '../utils/utils.js'
+import { OceanP2P } from '../common/OceanP2P.js'
+import { NodeCheckResult, NodeIpAndDns, OceanNodeConfig } from '../@types/clientP2P'
 import { P2PCommandResponse } from '../@types/commonP2P'
 
 EventEmitter.defaultMaxListeners = 500

@@ -1,35 +1,7 @@
-import { OceanNodeKeys } from './commonP2P'
+import { CommonOceanNodeConfig, OceanNodeKeys } from './commonP2P'
 
-export interface OceanNodeP2PConfig {
-  bootstrapNodes: string[]
-  enableIPV4: boolean
-  enableIPV6: boolean
-  ipV4BindAddress: string | null
-  ipV4BindTcpPort: number | null
-  ipV4BindWsPort: number | null
-  ipV6BindAddress: string | null
-  ipV6BindTcpPort: number | null
-  ipV6BindWsPort: number | null
-  pubsubPeerDiscoveryInterval: number
-  dhtMaxInboundStreams: number
-  dhtMaxOutboundStreams: number
-  mDNSInterval: number
-  connectionsMaxParallelDials: number
-  connectionsDialTimeout: number
-  announceAddresses: string[]
-  filterAnnouncedAddresses: string[]
-  autoNat: boolean
-  upnp: boolean
-  enableCircuitRelayServer: boolean
-  enableCircuitRelayClient: boolean
-  circuitRelays: number
-  announcePrivateIp: boolean
-  minConnections: number
-  maxConnections: number
-  autoDialPeerRetryThreshold: number
-  autoDialConcurrency: number
-  maxPeerAddrsToDial: number
-  autoDialInterval: number
+export interface OceanNodeP2PClientConfig extends CommonOceanNodeConfig {
+  
 }
 
 export interface OceanNodeProvider {
@@ -69,7 +41,7 @@ export interface OceanNodeStatus {
 
 export interface OceanNodeConfig {
   keys: OceanNodeKeys
-  p2pConfig: OceanNodeP2PConfig | null
+  p2pConfig: OceanNodeP2PClientConfig | null
 }
 
 export interface NodeIpAndDns {

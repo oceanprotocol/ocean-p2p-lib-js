@@ -1,7 +1,15 @@
 {
   "name": "ocean-p2p-lib",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "build": "npm run clean && npm run build:tsc",
     "build:tsc": "tsc --sourceMap",
@@ -43,6 +51,7 @@
     "@multiformats/multiaddr": "^10.2.0",
     "@oceanprotocol/contracts": "^2.2.1",
     "ethers": "^6.13.4",
+    "ip": "^2.0.1",
     "libp2p": "^1.8.0",
     "lodash": "^4.17.21",
     "private-ip": "^3.0.2",

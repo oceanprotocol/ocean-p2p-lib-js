@@ -4,6 +4,8 @@ import ip from 'ip'
 // eslint-disable-next-line camelcase
 import is_ip_private from 'private-ip'
 import { Transform } from 'stream'
+import { OceanNodeConfig as ClientOceanNodeConfig } from '../@types/clientP2P';
+import { OceanNodeConfig as ServerOceanNodeConfig } from '../@types/serverP2P';
 
 export class OceanP2P extends EventEmitter {
   _libp2p: any
@@ -15,6 +17,7 @@ export class OceanP2P extends EventEmitter {
   _publicAddress: string
   _publicKey: Uint8Array
   _privateKey: Uint8Array
+   _config: ClientOceanNodeConfig | ServerOceanNodeConfig | null
   _analyzeRemoteResponse: Transform
   _pendingAdvertise: string[] = []
   getPeerId(): string {

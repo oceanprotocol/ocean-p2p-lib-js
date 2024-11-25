@@ -1,8 +1,8 @@
-import { ENVIRONMENT_VARIABLES } from '../utils/constants'
-import { existsEnvironmentVariable } from './config'
+import { ENVIRONMENT_VARIABLES } from '../utils/constants.js'
+import { existsEnvironmentVariable } from './config.js'
 import fs from 'fs'
 import addresses from '@oceanprotocol/contracts/addresses/address.json' assert { type: 'json' }
-import { CORE_LOGGER } from '../logging/common'
+import { CORE_LOGGER } from '../logging/common.js'
 export function getOceanArtifactsAdresses(): any {
   try {
     if (existsEnvironmentVariable(ENVIRONMENT_VARIABLES.ADDRESS_FILE)) {

@@ -1,7 +1,7 @@
 import { P2PCommandResponse } from '../../@types/commonP2P'
-import { PROTOCOL_COMMANDS, SUPPORTED_PROTOCOL_COMMANDS } from '../../utils/constants'
-import { Command } from '../commands'
-import { ReadableString } from '../handlers'
+import { PROTOCOL_COMMANDS, SUPPORTED_PROTOCOL_COMMANDS } from '../../utils/constants.js'
+import { Command } from '../commands.js'
+import { ReadableString } from '../handlers.js'
 
 export type ValidateParams = {
   valid: boolean

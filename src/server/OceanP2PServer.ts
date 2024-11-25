@@ -66,7 +66,7 @@ export class OceanP2PServer extends OceanP2P {
   private _upnp_interval: NodeJS.Timeout
   private _ip_discovery_interval: NodeJS.Timeout
   private _idx: number
-  private readonly _config: OceanNodeConfig
+ 
   constructor(config: OceanNodeConfig) {
     super()
     this._config = config
@@ -78,7 +78,7 @@ export class OceanP2PServer extends OceanP2P {
 
   async start(options: any = null) {
     this._topic = 'oceanprotocol'
-    this._libp2p = await this.createNode(this._config)
+    this._libp2p = await this.createNode(this._config as OceanNodeConfig)
 
     this._libp2p.addEventListener('peer:connect', (evt: any) => {
       this.handlePeerConnect(evt)
@@ -108,6 +108,9 @@ export class OceanP2PServer extends OceanP2P {
       }
     })
     // listen for indexer events and advertise did
+
+
+    //TBD clarify
     // INDEXER_DDO_EVENT_EMITTER.addListener(EVENTS.METADATA_CREATED, (did) => {
     //   P2P_LOGGER.info(`Listened "${EVENTS.METADATA_CREATED}"`)
     //   this.advertiseDid(did)

@@ -1,5 +1,5 @@
 import { C2DClusterInfo } from './C2D'
-import { DenyList, OceanNodeKeys } from './commonP2P'
+import { CommonOceanNodeConfig, DenyList, OceanNodeKeys } from './commonP2P'
 
 export interface NetworkEvent {
   type: string
@@ -45,41 +45,12 @@ export interface RPCS {
   [chainId: string]: SupportedNetwork
 }
 
-export interface OceanNodeP2PConfig {
-  bootstrapNodes: string[]
-  bootstrapTimeout: number
-  bootstrapTagName: string
-  bootstrapTagValue: number
-  bootstrapTTL: number
-  enableIPV4: boolean
-  enableIPV6: boolean
-  ipV4BindAddress: string | null
-  ipV4BindTcpPort: number | null
-  ipV4BindWsPort: number | null
-  ipV6BindAddress: string | null
-  ipV6BindTcpPort: number | null
-  ipV6BindWsPort: number | null
-  pubsubPeerDiscoveryInterval: number
-  dhtMaxInboundStreams: number
-  dhtMaxOutboundStreams: number
-  enableDHTServer: boolean
-  mDNSInterval: number
-  connectionsMaxParallelDials: number
-  connectionsDialTimeout: number
-  announceAddresses: string[]
-  filterAnnouncedAddresses: string[]
-  autoNat: boolean
-  upnp: boolean
-  enableCircuitRelayServer: boolean
-  enableCircuitRelayClient: boolean
-  circuitRelays: number
-  announcePrivateIp: boolean
-  minConnections: number
-  maxConnections: number
-  autoDialPeerRetryThreshold: number
-  autoDialConcurrency: number
-  maxPeerAddrsToDial: number
-  autoDialInterval: number
+export interface OceanNodeP2PServerConfig extends CommonOceanNodeConfig{
+  bootstrapTimeout: number;
+  bootstrapTagName: string;
+  bootstrapTagValue: number;
+  bootstrapTTL: number;
+  enableDHTServer: boolean;
 }
 
 export interface OceanNodeConfig {
@@ -87,7 +58,7 @@ export interface OceanNodeConfig {
   allowedValidators: string[]
   keys: OceanNodeKeys
   hasP2P: boolean
-  p2pConfig: OceanNodeP2PConfig | null
+  p2pConfig: OceanNodeP2PServerConfig | null
   hasIndexer: boolean
   hasHttp: boolean
   hasDashboard: boolean
