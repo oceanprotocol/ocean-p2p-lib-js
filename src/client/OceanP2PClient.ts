@@ -26,11 +26,9 @@ import is_ip_private from 'private-ip'
 import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 // import { getIPv4, getIPv6 } from '../../utils/ip.js'
-import { createFromPrivKey } from '@libp2p/peer-id-factory'
-import { keys } from '@libp2p/crypto'
-import { ethers, Wallet } from 'ethers'
+import { ethers } from 'ethers'
 
-import { OceanNodeConfig, OceanNodeKeys, P2PCommandResponse } from '../@types/p2p'
+import { OceanNodeConfig, P2PCommandResponse } from '../@types/p2p'
 import { NodeIpAndDns, NodeCheckResult } from '../@types/monitor'
 import { defaultBootstrapAddresses } from '../utils/constants'
 import { Ed25519PeerId, RSAPeerId, Secp256k1PeerId, URLPeerId } from '@libp2p/interface'
@@ -51,9 +49,9 @@ export class OceanP2P extends EventEmitter {
   _analyzeRemoteResponse: Transform
   _pendingAdvertise: string[] = []
   _config: OceanNodeConfig
-  constructor() {
-    super()
-  }
+  // constructor() {
+  //   super()
+  // }
 
   async start(options: any = null, isWorker: boolean = false) {
     this._topic = 'oceanprotocol'

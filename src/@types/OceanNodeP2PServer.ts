@@ -47,34 +47,6 @@ export interface SupportedNetwork {
 export interface RPCS {
   [chainId: string]: SupportedNetwork
 }
-export interface OceanNodeConfig {
-  authorizedDecrypters: string[]
-  allowedValidators: string[]
-  keys: OceanNodeKeys
-  hasP2P: boolean
-  p2pConfig: OceanNodeP2PConfig | null
-  hasIndexer: boolean
-  hasHttp: boolean
-  hasDashboard: boolean
-  httpPort: number
-  feeStrategy: FeeStrategy
-  supportedNetworks?: RPCS
-  indexingNetworks?: RPCS
-  c2dClusters: C2DClusterInfo[]
-  c2dNodeUri: string
-  dockerConfig?: OceanNodeDockerConfig
-  accountPurgatoryUrl: string
-  assetPurgatoryUrl: string
-  allowedAdmins?: string[]
-  codeHash?: string
-  rateLimit?: number
-  denyList?: DenyList
-  unsafeURLs?: string[]
-}
-export interface DenyList {
-  peers: string[]
-  ips: string[]
-}
 
 export interface OceanNodeP2PConfig {
   bootstrapNodes: string[]
@@ -111,4 +83,33 @@ export interface OceanNodeP2PConfig {
   autoDialConcurrency: number
   maxPeerAddrsToDial: number
   autoDialInterval: number
+}
+export interface DenyList {
+  peers: string[]
+  ips: string[]
+}
+
+export interface OceanNodeConfig {
+  authorizedDecrypters: string[]
+  allowedValidators: string[]
+  keys: OceanNodeKeys
+  hasP2P: boolean
+  p2pConfig: OceanNodeP2PConfig | null
+  hasIndexer: boolean
+  hasHttp: boolean
+  hasDashboard: boolean
+  httpPort: number
+  feeStrategy: FeeStrategy
+  supportedNetworks?: RPCS
+  indexingNetworks?: RPCS
+  c2dClusters: C2DClusterInfo[]
+  c2dNodeUri: string
+  dockerConfig?: OceanNodeDockerConfig
+  accountPurgatoryUrl: string
+  assetPurgatoryUrl: string
+  allowedAdmins?: string[]
+  codeHash?: string
+  rateLimit?: number
+  denyList?: DenyList
+  unsafeURLs?: string[]
 }

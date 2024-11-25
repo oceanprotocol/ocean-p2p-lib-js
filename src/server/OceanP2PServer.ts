@@ -56,7 +56,7 @@ type DDOCache = {
 
 // republish any ddos we are providing to the network every 4 hours
 // (we can put smaller interval for testing purposes)
-const REPUBLISH_INTERVAL_HOURS = 1000 * 60 * 60 * 4 // 4 hours
+// const REPUBLISH_INTERVAL_HOURS = 1000 * 60 * 60 * 4 // 4 hours
 
 let index = 0
 
