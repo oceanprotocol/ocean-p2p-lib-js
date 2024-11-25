@@ -34,6 +34,8 @@
     "@multiformats/multiaddr": "^10.2.0",
     "ethers": "^6.13.4",
     "libp2p": "^2.3.1",
+    "lodash": "^4.17.21",
+    "lodash.clonedeep": "^4.5.0",
     "private-ip": "^3.0.2"
   }
 }
