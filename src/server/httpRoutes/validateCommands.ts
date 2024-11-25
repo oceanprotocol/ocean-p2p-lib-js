@@ -1,7 +1,7 @@
-import { P2PCommandResponse } from "../../@types/OceanNodeP2P"
-import { PROTOCOL_COMMANDS, SUPPORTED_PROTOCOL_COMMANDS } from "../../utils/constants"
-import { Command } from "../commands"
-import { ReadableString } from "../handlers"
+import { P2PCommandResponse } from '../../@types/OceanNodeP2PServer'
+import { PROTOCOL_COMMANDS, SUPPORTED_PROTOCOL_COMMANDS } from '../../utils/constants'
+import { Command } from '../commands'
+import { ReadableString } from '../handlers'
 
 export type ValidateParams = {
   valid: boolean
@@ -40,13 +40,13 @@ export function validateCommandParameters(
     logCommandData.rawData = []
   }
 
-//   CORE_LOGGER.info(
-//     `Checking received command data for Command "${commandStr}": ${JSON.stringify(
-//       logCommandData,
-//       null,
-//       4
-//     )}`
-//   )
+  //   CORE_LOGGER.info(
+  //     `Checking received command data for Command "${commandStr}": ${JSON.stringify(
+  //       logCommandData,
+  //       null,
+  //       4
+  //     )}`
+  //   )
 
   for (const field of requiredFields) {
     if (

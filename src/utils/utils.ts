@@ -1,3 +1,4 @@
+// eslint-disable-next-line camelcase
 import is_ip_private from 'private-ip'
 import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'

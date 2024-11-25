@@ -598,7 +598,7 @@ export class OceanP2P extends EventEmitter {
     return { peerId: peer, ipAddrs, success, errorCause, status, deltaTime }
   }
 
-  getPeerConnectionWithTimeout( 
+  getPeerConnectionWithTimeout(
     peerId: Ed25519PeerId | Secp256k1PeerId | RSAPeerId | URLPeerId,
     timeout: number
   ) {

@@ -36,10 +36,11 @@ import { Transform } from 'stream'
 import is_ip_private from 'private-ip'
 import ip from 'ip'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
-import { P2PCommandResponse } from '../@types/OceanNodeP2P.js'
-import { OceanNodeConfig } from '../@types/p2p.js'
-import { EVENTS } from '../utils/constants.js'
+// import { EVENTS } from '../utils/constants.js'
 import { cidFromRawString } from '../utils/conversions.js'
+import { P2P_LOGGER } from '../logging/common.js'
+import { OceanNodeConfig, P2PCommandResponse } from '../@types/OceanNodeP2PServer.js'
+import { GENERIC_EMOJIS, LOG_LEVELS_STR } from '../logging/Logger.js'
 // import { getIPv4, getIPv6 } from '../../utils/ip.js'
 
 const DEFAULT_OPTIONS = {
@@ -87,8 +88,6 @@ export class OceanP2P extends EventEmitter {
     }
   }
 
- 
-
   async start(options: any = null) {
     this._topic = 'oceanprotocol'
     this._libp2p = await this.createNode(this._config)
@@ -111,7 +110,7 @@ export class OceanP2P extends EventEmitter {
     // this._interval = setInterval(this._pollPeers.bind(this), this._options.pollInterval)
     this._libp2p.handle(this._protocol, handleProtocolCommands.bind(this))
 
-    setInterval(this.republishStoredDDOS.bind(this), REPUBLISH_INTERVAL_HOURS)
+    // setInterval(this.republishStoredDDOS.bind(this), REPUBLISH_INTERVAL_HOURS)
 
     this._idx = index++
 
@@ -121,10 +120,10 @@ export class OceanP2P extends EventEmitter {
       }
     })
     // listen for indexer events and advertise did
-    INDEXER_DDO_EVENT_EMITTER.addListener(EVENTS.METADATA_CREATED, (did) => {
-      P2P_LOGGER.info(`Listened "${EVENTS.METADATA_CREATED}"`)
-      this.advertiseDid(did)
-    })
+    // INDEXER_DDO_EVENT_EMITTER.addListener(EVENTS.METADATA_CREATED, (did) => {
+    //   P2P_LOGGER.info(`Listened "${EVENTS.METADATA_CREATED}"`)
+    //   this.advertiseDid(did)
+    // })
   }
 
   handlePeerConnect(details: any) {
@@ -758,46 +757,46 @@ export class OceanP2P extends EventEmitter {
 
   // republish the ddos we have
   // related: https://github.com/libp2p/go-libp2p-kad-dht/issues/323
-  async republishStoredDDOS() {
-    try {
-      if (!this.db) {
-        P2P_LOGGER.logMessage(
-          `republishStoredDDOS() attempt aborted because there is no database!`,
-          true
-        )
-        return
-      }
-      const db = this.db.ddo
-      const searchParameters = {
-        q: '*'
-      }
+  //   async republishStoredDDOS() {
+  //     try {
+  //       if (!this.db) {
+  //         P2P_LOGGER.logMessage(
+  //           `republishStoredDDOS() attempt aborted because there is no database!`,
+  //           true
+  //         )
+  //         return
+  //       }
+  //       const db = this.db.ddo
+  //       const searchParameters = {
+  //         q: '*'
+  //       }
 
-      const result: TypesenseSearchResponse[] = await db.search(searchParameters)
-      if (result && result.length > 0 && result[0].found) {
-        P2P_LOGGER.logMessage(`Will republish cid for ${result[0].found} documents`, true)
-        result[0].hits.forEach((hit: any) => {
-          const ddo = hit.document
-          this.advertiseDid(ddo.id)
-          // populate hash table if not exists
-          // (even if no peers are listening, it still goes to the pending publish table)
-          if (!this._ddoDHT.dht.has(ddo.id)) {
-            this.cacheDDO(ddo)
-          }
-          // todo check stuff like purgatory
-        })
-        // update time
-        this._ddoDHT.updated = new Date().getTime()
-      } else {
-        P2P_LOGGER.logMessage('There is nothing to republish, skipping...', true)
-      }
-    } catch (err) {
-      P2P_LOGGER.log(
-        LOG_LEVELS_STR.LEVEL_ERROR,
-        `Caught "${err.message}" on republishStoredDDOS()`,
-        true
-      )
-    }
-  }
+  //       const result: TypesenseSearchResponse[] = await db.search(searchParameters)
+  //       if (result && result.length > 0 && result[0].found) {
+  //         P2P_LOGGER.logMessage(`Will republish cid for ${result[0].found} documents`, true)
+  //         result[0].hits.forEach((hit: any) => {
+  //           const ddo = hit.document
+  //           this.advertiseDid(ddo.id)
+  //           // populate hash table if not exists
+  //           // (even if no peers are listening, it still goes to the pending publish table)
+  //           if (!this._ddoDHT.dht.has(ddo.id)) {
+  //             this.cacheDDO(ddo)
+  //           }
+  //           // todo check stuff like purgatory
+  //         })
+  //         // update time
+  //         this._ddoDHT.updated = new Date().getTime()
+  //       } else {
+  //         P2P_LOGGER.logMessage('There is nothing to republish, skipping...', true)
+  //       }
+  //     } catch (err) {
+  //       P2P_LOGGER.log(
+  //         LOG_LEVELS_STR.LEVEL_ERROR,
+  //         `Caught "${err.message}" on republishStoredDDOS()`,
+  //         true
+  //       )
+  //     }
+  //   }
 
   // cache a ddos object
   cacheDDO(ddo: any) {
@@ -833,50 +832,50 @@ export class OceanP2P extends EventEmitter {
    * @returns  boolean from counter
    */
   // eslint-disable-next-line require-await
-  async storeAndAdvertiseDDOS(list: any[]): Promise<boolean> {
-    if (!this.db) {
-      P2P_LOGGER.logMessage(
-        `storeAndAdvertiseDDOS() attempt aborted because there is no database!`,
-        true
-      )
-      return false
-    }
-    try {
-      let count = 0
-      P2P_LOGGER.logMessage(
-        `Trying to store and advertise ${list.length} initial DDOS`,
-        true
-      )
-      const db = this.db.ddo
-      list.forEach(async (ddo: any) => {
-        // if already added before, create() will return null, but still advertise it
-        try {
-          await db.create(ddo)
-          await this.advertiseDid(ddo.id)
-          // populate hash table
-          this.cacheDDO(ddo)
-          count++
-        } catch (e) {
-          P2P_LOGGER.log(
-            LOG_LEVELS_STR.LEVEL_ERROR,
-            `Caught "${e.message}" on storeAndAdvertiseDDOS()`,
-            true
-          )
-        }
-      })
-      if (count > 0) {
-        this._ddoDHT.updated = new Date().getTime()
-      }
-      return count === list.length
-    } catch (err) {
-      P2P_LOGGER.log(
-        LOG_LEVELS_STR.LEVEL_ERROR,
-        `Caught "${err.message}" on storeAndAdvertiseDDOS()`,
-        true
-      )
-      return false
-    }
-  }
+  //   async storeAndAdvertiseDDOS(list: any[]): Promise<boolean> {
+  //     if (!this.db) {
+  //       P2P_LOGGER.logMessage(
+  //         `storeAndAdvertiseDDOS() attempt aborted because there is no database!`,
+  //         true
+  //       )
+  //       return false
+  //     }
+  //     try {
+  //       let count = 0
+  //       P2P_LOGGER.logMessage(
+  //         `Trying to store and advertise ${list.length} initial DDOS`,
+  //         true
+  //       )
+  //       const db = this.db.ddo
+  //       list.forEach(async (ddo: any) => {
+  //         // if already added before, create() will return null, but still advertise it
+  //         try {
+  //           await db.create(ddo)
+  //           await this.advertiseDid(ddo.id)
+  //           // populate hash table
+  //           this.cacheDDO(ddo)
+  //           count++
+  //         } catch (e) {
+  //           P2P_LOGGER.log(
+  //             LOG_LEVELS_STR.LEVEL_ERROR,
+  //             `Caught "${e.message}" on storeAndAdvertiseDDOS()`,
+  //             true
+  //           )
+  //         }
+  //       })
+  //       if (count > 0) {
+  //         this._ddoDHT.updated = new Date().getTime()
+  //       }
+  //       return count === list.length
+  //     } catch (err) {
+  //       P2P_LOGGER.log(
+  //         LOG_LEVELS_STR.LEVEL_ERROR,
+  //         `Caught "${err.message}" on storeAndAdvertiseDDOS()`,
+  //         true
+  //       )
+  //       return false
+  //     }
+  //   }
 
   async UPnpCron() {
     // we need to wait until we have some peers connected

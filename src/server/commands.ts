@@ -1,6 +1,13 @@
-import { ArweaveFileObject, BaseFileObject, EncryptMethod, FileObjectType, IpfsFileObject, UrlFileObject } from "../@types/fileObject"
-import { P2PCommandResponse } from "../@types/OceanNodeP2P"
-import { ValidateParams } from "./httpRoutes/validateCommands"
+import {
+  ArweaveFileObject,
+  BaseFileObject,
+  EncryptMethod,
+  FileObjectType,
+  IpfsFileObject,
+  UrlFileObject
+} from '../@types/fileObject'
+import { P2PCommandResponse } from '../@types/OceanNodeP2PServer'
+import { ValidateParams } from './httpRoutes/validateCommands'
 
 export interface Command {
   command: string // command name
@@ -138,8 +145,6 @@ export interface ComputeDetails {
   env: string // with hash
   validUntil: number
 }
-
-
 
 export interface ComputeGetStatusCommand extends Command {
   consumerAddress?: string
