@@ -1,7 +1,4 @@
-// import diff from 'hyperdiff'
-
 import EventEmitter from 'node:events'
-
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { bootstrap } from '@libp2p/bootstrap'
@@ -11,7 +8,6 @@ import { yamux } from '@chainsafe/libp2p-yamux'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { Transform } from 'stream'
 import { pipe } from 'it-pipe'
-// import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 import { tcp } from '@libp2p/tcp'
 import { webSockets } from '@libp2p/websockets'
@@ -21,9 +17,7 @@ import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
 import { kadDHT, passthroughMapper } from '@libp2p/kad-dht'
 import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
-// import { getIPv4, getIPv6 } from '../../utils/ip.js'
 import { ethers } from 'ethers'
-
 import { defaultBootstrapAddresses } from '../utils/constants.js'
 import { Ed25519PeerId, RSAPeerId, Secp256k1PeerId, URLPeerId } from '@libp2p/interface'
 import { extractPublicIp, getPeerIdFromPrivateKey } from '../utils/utils.js'
@@ -34,17 +28,12 @@ import { P2PCommandResponse } from '../@types/commonP2P'
 EventEmitter.defaultMaxListeners = 500
 
 export class OceanP2PClient extends OceanP2P {
-  // constructor() {
-  //   super()
-  // }
-
-  async start(options: any = null, isWorker: boolean = false) {
+  async start(options: any = null) {
     this._topic = 'oceanprotocol'
-
     // Determine the private key and port based on whether this is a worker or distributor
     let privateKey: string = process.env.PRIVATE_KEY
-    let ipV4BindWsPort = 9001
-    if (isWorker) {
+    let ipV4BindWsPort = parseInt(process.env.IPV4_BIND_WS_PORT, 10)
+    if (options?.isWorker) {
       const randomWallet = ethers.Wallet.createRandom()
       // eslint-disable-next-line prefer-destructuring
       privateKey = randomWallet.privateKey
@@ -56,34 +45,72 @@ export class OceanP2PClient extends OceanP2P {
       keys: await getPeerIdFromPrivateKey(privateKey), // Use the private key accordingly
       p2pConfig: {
         bootstrapNodes: defaultBootstrapAddresses,
-        enableIPV4: true,
-        enableIPV6: false,
-        ipV4BindAddress: '0.0.0.0',
-        ipV4BindTcpPort: 0,
+        enableIPV4: process.env.ENABLE_IPV4 ? process.env.ENABLE_IPV4 === 'true' : true,
+        enableIPV6: process.env.ENABLE_IPV6 ? process.env.ENABLE_IPV6 === 'true' : false,
+        ipV4BindAddress: process.env.IPV4_BIND_ADDRESS || '127.0.0.1',
+        ipV4BindTcpPort: process.env.IPV4_BIND_TCP_PORT
+          ? parseInt(process.env.IPV4_BIND_TCP_PORT, 10)
+          : 0,
         ipV4BindWsPort,
-        ipV6BindAddress: '::1',
-        ipV6BindTcpPort: 9002,
-        ipV6BindWsPort: 9003,
+        ipV6BindAddress: process.env.IPV6_BIND_ADDRESS || '::1',
+        ipV6BindTcpPort: process.env.IPV6_BIND_TCP_PORT
+          ? parseInt(process.env.IPV6_BIND_TCP_PORT, 10)
+          : 9002,
+        ipV6BindWsPort: process.env.IPV6_BIND_WS_PORT
+          ? parseInt(process.env.IPV6_BIND_WS_PORT, 10)
+          : 9003,
         announceAddresses: [],
-        pubsubPeerDiscoveryInterval: 3000,
-        dhtMaxInboundStreams: 500,
-        dhtMaxOutboundStreams: 500,
-        mDNSInterval: 20e3,
-        connectionsMaxParallelDials: 100 * 25,
-        connectionsDialTimeout: 30e3,
-        upnp: false,
-        autoNat: false,
-        enableCircuitRelayServer: false,
-        enableCircuitRelayClient: false,
-        circuitRelays: 0,
-        announcePrivateIp: false,
+        pubsubPeerDiscoveryInterval: process.env.PUBSUB_PEER_DISCOVERY_INTERVAL
+          ? parseInt(process.env.PUBSUB_PEER_DISCOVERY_INTERVAL, 10)
+          : 3000,
+        dhtMaxInboundStreams: process.env.DHT_MAX_INBOUND_STREAMS
+          ? parseInt(process.env.DHT_MAX_INBOUND_STREAMS, 10)
+          : 500,
+        dhtMaxOutboundStreams: process.env.DHT_MAX_OUTBOUND_STREAMS
+          ? parseInt(process.env.DHT_MAX_OUTBOUND_STREAMS, 10)
+          : 500,
+        mDNSInterval: process.env.MDNS_INTERVAL
+          ? parseInt(process.env.MDNS_INTERVAL, 10)
+          : 20000,
+        connectionsMaxParallelDials: process.env.CONNECTIONS_MAX_PARALLEL_DIALS
+          ? parseInt(process.env.CONNECTIONS_MAX_PARALLEL_DIALS, 10)
+          : 2500,
+        connectionsDialTimeout: process.env.CONNECTIONS_DIAL_TIMEOUT
+          ? parseInt(process.env.CONNECTIONS_DIAL_TIMEOUT, 10)
+          : 30000,
+        upnp: process.env.UPNP ? process.env.UPNP === 'true' : false,
+        autoNat: process.env.AUTONAT ? process.env.AUTONAT === 'true' : false,
+        enableCircuitRelayServer: process.env.ENABLE_CIRCUIT_RELAY_SERVER
+          ? process.env.ENABLE_CIRCUIT_RELAY_SERVER === 'true'
+          : false,
+        enableCircuitRelayClient: process.env.ENABLE_CIRCUIT_RELAY_CLIENT
+          ? process.env.ENABLE_CIRCUIT_RELAY_CLIENT === 'true'
+          : false,
+        circuitRelays: process.env.CIRCUIT_RELAYS
+          ? parseInt(process.env.CIRCUIT_RELAYS, 10)
+          : 0,
+        announcePrivateIp: process.env.ANNOUNCE_PRIVATE_IP
+          ? process.env.ANNOUNCE_PRIVATE_IP === 'true'
+          : false,
         filterAnnouncedAddresses: ['172.15.0.0/24'],
-        minConnections: 2,
-        maxConnections: 6000,
-        autoDialPeerRetryThreshold: 1000 * 120,
-        autoDialConcurrency: 500,
-        maxPeerAddrsToDial: 25,
-        autoDialInterval: 5000
+        minConnections: process.env.MIN_CONNECTIONS
+          ? parseInt(process.env.MIN_CONNECTIONS, 10)
+          : 2,
+        maxConnections: process.env.MAX_CONNECTIONS
+          ? parseInt(process.env.MAX_CONNECTIONS, 10)
+          : 6000,
+        autoDialPeerRetryThreshold: process.env.AUTO_DIAL_PEER_RETRY_THRESHOLD
+          ? parseInt(process.env.AUTO_DIAL_PEER_RETRY_THRESHOLD, 10)
+          : 120000,
+        autoDialConcurrency: process.env.AUTO_DIAL_CONCURRENCY
+          ? parseInt(process.env.AUTO_DIAL_CONCURRENCY, 10)
+          : 500,
+        maxPeerAddrsToDial: process.env.MAX_PEER_ADDRS_TO_DIAL
+          ? parseInt(process.env.MAX_PEER_ADDRS_TO_DIAL, 10)
+          : 25,
+        autoDialInterval: process.env.AUTO_DIAL_INTERVAL
+          ? parseInt(process.env.AUTO_DIAL_INTERVAL, 10)
+          : 5000
       }
     }
     this._libp2p = await this.createNode(this._config)
@@ -148,7 +175,6 @@ export class OceanP2PClient extends OceanP2P {
           `/ip6/${config.p2pConfig.ipV6BindAddress}/tcp/${config.p2pConfig.ipV6BindWsPort}/ws`
         )
       }
-      // const transports = [webSockets(), tcp()]
       const transports = [
         webSockets(),
         tcp(),
@@ -180,10 +206,7 @@ export class OceanP2PClient extends OceanP2P {
         peerId: config.keys.peerId,
         transports,
         streamMuxers: [yamux()],
-        connectionEncryption: [
-          noise()
-          // plaintext()
-        ],
+        connectionEncryption: [noise()],
         services: servicesConfig,
         connectionManager: {
           maxParallelDials: config.p2pConfig.connectionsMaxParallelDials, // 150 total parallel multiaddr dials
@@ -347,7 +370,6 @@ export class OceanP2PClient extends OceanP2P {
       relayNode: null
     }
     let status: any
-    // console.log('Start checking ' + peer)
 
     try {
       peerId = peerIdFromString(peer)
@@ -375,7 +397,6 @@ export class OceanP2PClient extends OceanP2P {
         // console.log(e)
       }
       try {
-        // console.log('Search dht')
         peerData = await this._libp2p.peerRouting.findPeer(peerId, {
           signal: AbortSignal.timeout(5000),
           useCache: false
@@ -484,11 +505,6 @@ export class OceanP2PClient extends OceanP2P {
         errorCause = tr.status.error
       }
     }
-    // if (!success) {
-    //   // at least get status
-    //   status = await getNodeStatusFromOPF(peer)
-    // }
-    // return await updateNodeStatus(peer, ipAddrs, success, errorCause, status, deltaTime)
     if (success) console.log('Eligible     ' + peer + ':  IPs:' + JSON.stringify(ipAddrs))
     else
       console.log(

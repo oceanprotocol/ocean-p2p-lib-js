@@ -6,16 +6,26 @@ import dns from 'dns'
 import { keys } from '@libp2p/crypto'
 import { createFromPrivKey } from '@libp2p/peer-id-factory'
 import { Wallet } from 'ethers'
-import { hexStringToByteArray } from './conversions.js'
 import crypto from 'crypto'
 import { OceanNodeKeys } from '../@types/commonP2P.js'
 import { NodeIpAndDns } from '../@types/clientP2P.js'
+
+export function hexStringToByteArray(hexString: any) {
+  if (hexString.length % 2 !== 0) {
+    throw new Error('Must have an even number of hex digits to convert to bytes')
+  } /* w w w.  jav  a2 s .  c o  m */
+  const numBytes = hexString.length / 2
+  const byteArray = new Uint8Array(numBytes)
+  for (let i = 0; i < numBytes; i++) {
+    byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16)
+  }
+  return byteArray
+}
 
 export function create256Hash(input: string): string {
   const result = crypto.createHash('sha256').update(input).digest('hex')
   return '0x' + result
 }
-
 export async function getPeerIdFromPrivateKey(
   privateKey: string
 ): Promise<OceanNodeKeys> {
@@ -36,7 +46,6 @@ export async function getPeerIdFromPrivateKey(
     ethAddress: new Wallet(privateKey.substring(2)).address
   }
 }
-
 function lookupPromise(addr: string) {
   return new Promise((resolve, reject) => {
     dns.lookup(addr, (err, address) => {
@@ -45,7 +54,6 @@ function lookupPromise(addr: string) {
     })
   })
 }
-
 export async function extractPublicIp(addrs: Multiaddr[]): Promise<NodeIpAndDns> {
   const ipFound: NodeIpAndDns = {
     ip: null,
