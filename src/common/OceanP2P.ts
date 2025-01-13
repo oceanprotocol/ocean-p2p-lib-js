@@ -3,23 +3,23 @@ import { multiaddr } from '@multiformats/multiaddr'
 import ip from 'ip'
 // eslint-disable-next-line camelcase
 import is_ip_private from 'private-ip'
-import { Transform } from 'stream'
-import { OceanNodeConfig as ClientOceanNodeConfig } from '../@types/clientP2P'
 import { Libp2p } from '@libp2p/interface'
+import { OceanNodeConfig } from '../@types/commonP2P'
+import { Transform } from 'stream'
 
 export class OceanP2P extends EventEmitter {
   _libp2p: any
-  _topic: string
-  _options: any
-  _peers: any[]
-  _connections: {}
-  _protocol: string
+  _topic: string = 'oceanprotocol'
+  _protocol: string = '/ocean/nodes/1.0.0'
   _publicAddress: string
   _publicKey: Uint8Array
   _privateKey: Uint8Array
-  _config: ClientOceanNodeConfig | null
+  _config: OceanNodeConfig
   _analyzeRemoteResponse: Transform
-  _pendingAdvertise: string[] = []
+  constructor(config: OceanNodeConfig) {
+    super()
+    this._config = config
+  }
 
   async start(options: any = null) {}
 
@@ -27,18 +27,12 @@ export class OceanP2P extends EventEmitter {
     return this._config.keys.peerId.toString()
   }
 
-  /**
-   * Is the message intended for this peer or we need to connect to another one?
-   * @param targetPeerID  the target node id
-   * @returns true if the message is intended for this peer, false otherwise
-   */
   isTargetPeerSelf(targetPeerID: string): boolean {
     return targetPeerID === this.getPeerId()
   }
 
   // eslint-disable-next-line require-await
-  async createNode(config: ClientOceanNodeConfig | null): Promise<Libp2p | null> {
-    console.log('TOP 1')
+  async createNode(config: OceanNodeConfig | null): Promise<Libp2p | null> {
     return null
   }
 
@@ -49,7 +43,6 @@ export class OceanP2P extends EventEmitter {
 
   // eslint-disable-next-line require-await
   async getOceanPeers(running: boolean = true, known: boolean = true) {
-    console.log('Base implementation: getOceanPeers')
     return null as any
   }
 

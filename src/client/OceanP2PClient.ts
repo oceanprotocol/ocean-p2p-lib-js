@@ -1,13 +1,9 @@
 import EventEmitter from 'node:events'
-import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { bootstrap } from '@libp2p/bootstrap'
 import { noise } from '@chainsafe/libp2p-noise'
 import { mdns } from '@libp2p/mdns'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { peerIdFromString } from '@libp2p/peer-id'
 import { Transform } from 'stream'
-import { pipe } from 'it-pipe'
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 import { tcp } from '@libp2p/tcp'
 import { webSockets } from '@libp2p/websockets'
@@ -16,109 +12,16 @@ import { identify } from '@libp2p/identify'
 import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
 import { kadDHT, passthroughMapper } from '@libp2p/kad-dht'
-import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
-import { ethers } from 'ethers'
-import { defaultBootstrapAddresses } from '../utils/constants.js'
 import { Ed25519PeerId, RSAPeerId, Secp256k1PeerId, URLPeerId } from '@libp2p/interface'
-import { extractPublicIp, getPeerIdFromPrivateKey } from '../utils/utils.js'
 import { OceanP2P } from '../common/OceanP2P.js'
-import { NodeCheckResult, NodeIpAndDns, OceanNodeConfig } from '../@types/clientP2P'
-import { P2PCommandResponse } from '../@types/commonP2P'
+import { OceanNodeConfig } from '../@types/commonP2P.js'
 
 EventEmitter.defaultMaxListeners = 500
 
 export class OceanP2PClient extends OceanP2P {
   async start(options: any = null) {
     this._topic = 'oceanprotocol'
-    // Determine the private key and port based on whether this is a worker or distributor
-    let privateKey: string = process.env.PRIVATE_KEY
-    let ipV4BindWsPort = parseInt(process.env.IPV4_BIND_WS_PORT, 10)
-    if (options?.isWorker) {
-      const randomWallet = ethers.Wallet.createRandom()
-      // eslint-disable-next-line prefer-destructuring
-      privateKey = randomWallet.privateKey
-      console.log(`Generated random Ethereum private key for worker: ${privateKey}`)
-      ipV4BindWsPort = 9002
-    }
-
-    this._config = {
-      keys: await getPeerIdFromPrivateKey(privateKey), // Use the private key accordingly
-      p2pConfig: {
-        bootstrapNodes: defaultBootstrapAddresses,
-        enableIPV4: process.env.ENABLE_IPV4 ? process.env.ENABLE_IPV4 === 'true' : true,
-        enableIPV6: process.env.ENABLE_IPV6 ? process.env.ENABLE_IPV6 === 'true' : false,
-        ipV4BindAddress: process.env.IPV4_BIND_ADDRESS || '127.0.0.1',
-        ipV4BindTcpPort: process.env.IPV4_BIND_TCP_PORT
-          ? parseInt(process.env.IPV4_BIND_TCP_PORT, 10)
-          : 0,
-        ipV4BindWsPort,
-        ipV6BindAddress: process.env.IPV6_BIND_ADDRESS || '::1',
-        ipV6BindTcpPort: process.env.IPV6_BIND_TCP_PORT
-          ? parseInt(process.env.IPV6_BIND_TCP_PORT, 10)
-          : 9002,
-        ipV6BindWsPort: process.env.IPV6_BIND_WS_PORT
-          ? parseInt(process.env.IPV6_BIND_WS_PORT, 10)
-          : 9003,
-        announceAddresses: [],
-        pubsubPeerDiscoveryInterval: process.env.PUBSUB_PEER_DISCOVERY_INTERVAL
-          ? parseInt(process.env.PUBSUB_PEER_DISCOVERY_INTERVAL, 10)
-          : 3000,
-        dhtMaxInboundStreams: process.env.DHT_MAX_INBOUND_STREAMS
-          ? parseInt(process.env.DHT_MAX_INBOUND_STREAMS, 10)
-          : 500,
-        dhtMaxOutboundStreams: process.env.DHT_MAX_OUTBOUND_STREAMS
-          ? parseInt(process.env.DHT_MAX_OUTBOUND_STREAMS, 10)
-          : 500,
-        mDNSInterval: process.env.MDNS_INTERVAL
-          ? parseInt(process.env.MDNS_INTERVAL, 10)
-          : 20000,
-        connectionsMaxParallelDials: process.env.CONNECTIONS_MAX_PARALLEL_DIALS
-          ? parseInt(process.env.CONNECTIONS_MAX_PARALLEL_DIALS, 10)
-          : 2500,
-        connectionsDialTimeout: process.env.CONNECTIONS_DIAL_TIMEOUT
-          ? parseInt(process.env.CONNECTIONS_DIAL_TIMEOUT, 10)
-          : 30000,
-        upnp: process.env.UPNP ? process.env.UPNP === 'true' : false,
-        autoNat: process.env.AUTONAT ? process.env.AUTONAT === 'true' : false,
-        enableCircuitRelayServer: process.env.ENABLE_CIRCUIT_RELAY_SERVER
-          ? process.env.ENABLE_CIRCUIT_RELAY_SERVER === 'true'
-          : false,
-        enableCircuitRelayClient: process.env.ENABLE_CIRCUIT_RELAY_CLIENT
-          ? process.env.ENABLE_CIRCUIT_RELAY_CLIENT === 'true'
-          : false,
-        circuitRelays: process.env.CIRCUIT_RELAYS
-          ? parseInt(process.env.CIRCUIT_RELAYS, 10)
-          : 0,
-        announcePrivateIp: process.env.ANNOUNCE_PRIVATE_IP
-          ? process.env.ANNOUNCE_PRIVATE_IP === 'true'
-          : false,
-        filterAnnouncedAddresses: ['172.15.0.0/24'],
-        minConnections: process.env.MIN_CONNECTIONS
-          ? parseInt(process.env.MIN_CONNECTIONS, 10)
-          : 2,
-        maxConnections: process.env.MAX_CONNECTIONS
-          ? parseInt(process.env.MAX_CONNECTIONS, 10)
-          : 6000,
-        autoDialPeerRetryThreshold: process.env.AUTO_DIAL_PEER_RETRY_THRESHOLD
-          ? parseInt(process.env.AUTO_DIAL_PEER_RETRY_THRESHOLD, 10)
-          : 120000,
-        autoDialConcurrency: process.env.AUTO_DIAL_CONCURRENCY
-          ? parseInt(process.env.AUTO_DIAL_CONCURRENCY, 10)
-          : 500,
-        maxPeerAddrsToDial: process.env.MAX_PEER_ADDRS_TO_DIAL
-          ? parseInt(process.env.MAX_PEER_ADDRS_TO_DIAL, 10)
-          : 25,
-        autoDialInterval: process.env.AUTO_DIAL_INTERVAL
-          ? parseInt(process.env.AUTO_DIAL_INTERVAL, 10)
-          : 5000
-      }
-    }
     this._libp2p = await this.createNode(this._config)
-
-    this._options = options
-    this._peers = []
-    this._connections = {}
-    this._protocol = '/ocean/nodes/1.0.0'
 
     this._analyzeRemoteResponse = new Transform({
       transform(chunk, encoding, callback) {
@@ -133,7 +36,6 @@ export class OceanP2PClient extends OceanP2P {
       this._publicKey = config.keys.publicKey
       this._privateKey = config.keys.privateKey
       /** @type {import('libp2p').Libp2pOptions} */
-      // start with some default, overwrite based on config later
       const servicesConfig = {
         identify: identify(),
         dht: kadDHT({
@@ -148,12 +50,6 @@ export class OceanP2PClient extends OceanP2P {
           kBucketSize: 20,
           protocol: '/ocean/nodes/1.0.0/kad/1.0.0',
           peerInfoMapper: passthroughMapper
-          // protocolPrefix: '/ocean/nodes/1.0.0'
-          // randomWalk: {
-          //  enabled: true,            // Allows to disable discovery (enabled by default)
-          //  interval: 300e3,
-          //  timeout: 10e3
-          // }
         }),
         ping: ping(),
         dcutr: dcutr()
@@ -287,235 +183,6 @@ export class OceanP2PClient extends OceanP2P {
 
     console.log('Got ' + Object.keys(allPeers).length + ' peers from peerStore')
     return allPeers
-  }
-
-  async sendTo(
-    multiaddrs: Multiaddr[],
-    message: string,
-    sink: any
-  ): Promise<P2PCommandResponse> {
-    const maxRetries = process.env.DIAL_PROTOCOL_RETRIES
-      ? parseInt(process.env.DIAL_PROTOCOL_RETRIES)
-      : 2
-
-    const dialTimeout = process.env.DIAL_TIMEOUT
-      ? parseInt(process.env.DIAL_TIMEOUT)
-      : 5000
-
-    let stream
-    let attempt = 0
-    const response: P2PCommandResponse = {
-      status: { httpStatus: 200, error: '' },
-      stream: null
-    }
-
-    while (attempt < maxRetries) {
-      try {
-        attempt += 1
-        stream = await this._libp2p.dialProtocol(multiaddrs, this._protocol, {
-          signal: AbortSignal.timeout(dialTimeout),
-          priority: 100,
-          runOnTransientConnection: true
-        })
-        break
-      } catch (e) {
-        if (attempt >= maxRetries) {
-          response.status.httpStatus = 404
-          response.status.error = e.message
-            ? `Cannot connect to peer(${e.message})`
-            : 'Cannot connect to peer'
-          return response
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-      }
-    }
-
-    if (stream) {
-      response.stream = stream
-      try {
-        await pipe(
-          // Source data
-          [uint8ArrayFromString(message)],
-          // Write to the stream, and pass its output to the next function
-          stream,
-          // Sink function
-          sink
-        )
-        // await stream.closeWrite() // Close the write side of the stream
-        // await stream.closeRead() // Close the read side of the stream
-      } catch (err) {
-        // Handle errors during message transmission
-        response.status.httpStatus = 404
-        response.status.error = err.message
-
-        if (stream) stream.abort(err)
-      }
-    } else {
-      response.status.httpStatus = 404
-      response.status.error = 'Unable to get remote P2P stream (null)'
-    }
-
-    return response
-  }
-
-  async checkPeer(peer: string, addrs: any, deltaTime: number): Promise<NodeCheckResult> {
-    let peerId = null
-    let success = false
-    let errorCause
-    let ipAddrs: NodeIpAndDns = {
-      ip: null,
-      dns: null,
-      port: 0,
-      relay: false,
-      relayNode: null
-    }
-    let status: any
-
-    try {
-      peerId = peerIdFromString(peer)
-    } catch (e) {
-      errorCause = 'Invalid peer'
-    }
-    let peerData = null
-    const multiaddrs: Multiaddr[] = []
-    // we need to take peerData
-    // search peerStore and dht only if we don't have addresses
-    if (addrs.length < 1) {
-      // first from our peerStore, maybe we are already connected
-      // then we must fetch additional multiaddrs from DHT
-      try {
-        // console.log('Search peer store')
-        peerData = await this._libp2p.peerStore.get(peerId, {
-          signal: AbortSignal.timeout(2000)
-        })
-        if (peerData) {
-          for (const x of peerData.addresses) {
-            multiaddrs.push(x.multiaddr)
-          }
-        }
-      } catch (e) {
-        // console.log(e)
-      }
-      try {
-        peerData = await this._libp2p.peerRouting.findPeer(peerId, {
-          signal: AbortSignal.timeout(5000),
-          useCache: false
-        })
-        if (peerData) {
-          for (const index in peerData.multiaddrs) {
-            multiaddrs.push(peerData.multiaddrs[index])
-          }
-        }
-      } catch (e) {
-        // console.log(e)
-      }
-    } else {
-      for (const x of addrs) {
-        multiaddrs.push(x)
-      }
-    }
-    // now we should have peer multiaddrs
-    if (multiaddrs.length < 1) {
-      errorCause = 'No peer data'
-      peerId = null
-    } else {
-      try {
-        ipAddrs = await extractPublicIp(multiaddrs)
-      } catch (e) {
-        console.error(`Error inside extractPublicIp loop:${e.message}`)
-      }
-      if (ipAddrs.ip == null && ipAddrs.relay === false) {
-        errorCause = 'No public IP'
-        peerId = null
-      }
-    }
-    if (peerId) {
-      let chunks: string = ''
-      const sink = async function (source: any) {
-        let first = true
-        for await (const chunk of source) {
-          if (first) {
-            first = false
-            try {
-              const str = uint8ArrayToString(chunk.subarray()) // Obs: we need to specify the length of the subarrays
-              // eslint-disable-next-line no-unused-vars
-              const decoded = JSON.parse(str)
-            } catch (e) {
-              console.log(e)
-            }
-          } else {
-            const str = uint8ArrayToString(chunk.subarray())
-            chunks = chunks.concat(str)
-            return str
-          }
-        }
-      }
-      // when dialing a peer using multiaddrs, we need to make that
-      //    all multiaddrs have peerID
-      //          or
-      //    none of the multiaddrs have peerID
-      let finalmultiaddrs: Multiaddr[] = []
-      const finalmultiaddrsWithAddress: Multiaddr[] = []
-      const finalmultiaddrsWithOutAddress: Multiaddr[] = []
-      for (const x of multiaddrs) {
-        if (x.toString().includes(peer)) {
-          try {
-            finalmultiaddrsWithAddress.push(multiaddr(x.toString()))
-          } catch (e) {
-            //
-          }
-        } else {
-          let sd = x.toString()
-          if (x.toString().includes('p2p-circuit')) {
-            sd = sd + '/p2p/' + peerId
-          }
-          try {
-            finalmultiaddrsWithOutAddress.push(multiaddr(sd))
-          } catch (e) {
-            //
-          }
-        }
-      }
-      if (finalmultiaddrsWithAddress.length > finalmultiaddrsWithOutAddress.length)
-        finalmultiaddrs = finalmultiaddrsWithAddress
-      else finalmultiaddrs = finalmultiaddrsWithOutAddress
-      const tr = await this.sendTo(
-        finalmultiaddrs,
-        JSON.stringify({
-          command: 'status',
-          node: peerId
-        }),
-        sink
-      )
-
-      try {
-        const peerConnection = await this.getPeerConnectionWithTimeout(peerId, 2000)
-        if (peerConnection) {
-          this.closePeerConnection(peerConnection)
-        } else {
-          console.error(`Unable to retrieve connection for peerId: ${peerId}`)
-        }
-      } catch (error) {
-        console.error(`Error retrieving connection for peerId: ${peerId}:`, error.message)
-      }
-      if (tr.status.httpStatus === 200) {
-        status = chunks
-        success = true
-      } else {
-        errorCause = tr.status.error
-      }
-    }
-    if (success) console.log('Eligible     ' + peer + ':  IPs:' + JSON.stringify(ipAddrs))
-    else
-      console.log(
-        'Not eligible ' +
-          peer +
-          ':  IPs:' +
-          JSON.stringify(ipAddrs) +
-          '  cause:' +
-          errorCause
-      )
-    return { peerId: peer, ipAddrs, success, errorCause, status, deltaTime }
   }
 
   getPeerConnectionWithTimeout(

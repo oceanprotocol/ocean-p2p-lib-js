@@ -1,6 +1,4 @@
-import { Stream } from 'stream'
-
-export interface CommonOceanNodeConfig {
+export interface CommonOceanNodeP2PConfig {
   bootstrapNodes: string[]
   enableIPV4: boolean
   enableIPV6: boolean
@@ -37,12 +35,8 @@ export interface OceanNodeKeys {
   privateKey: any
   ethAddress: string
 }
-export interface P2PStatusResponse {
-  httpStatus: number
-  error?: string
-  headers?: any
-}
-export interface P2PCommandResponse {
-  status: P2PStatusResponse
-  stream: Stream | null
+export interface OceanNodeP2PClientConfig extends CommonOceanNodeP2PConfig {}
+export interface OceanNodeConfig {
+  keys: OceanNodeKeys
+  p2pConfig: OceanNodeP2PClientConfig | null
 }
