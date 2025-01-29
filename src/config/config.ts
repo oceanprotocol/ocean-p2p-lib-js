@@ -2,13 +2,18 @@ import { OceanNodeConfig } from '../@types/commonP2P'
 import { defaultBootstrapAddresses } from '../utils/constants.js'
 import { getPeerIdFromPrivateKey } from '../utils/utils.js'
 
-export async function getDefaultClientConfig(
-  privateKey: string
+async function createOceanNodeConfig(
+  privateKey: string,
+  extraConfig?: Partial<OceanNodeConfig['p2pConfig']>
 ): Promise<OceanNodeConfig> {
-  const config: OceanNodeConfig = {
+  return {
     keys: await getPeerIdFromPrivateKey(privateKey),
     p2pConfig: {
       bootstrapNodes: defaultBootstrapAddresses,
+      bootstrapTimeout: 20000,
+      bootstrapTagName: 'bootstrap',
+      bootstrapTagValue: 50,
+      bootstrapTTL: 120000,
       enableIPV4: true,
       enableIPV6: false,
       ipV4BindAddress: '0.0.0.0',
@@ -36,8 +41,20 @@ export async function getDefaultClientConfig(
       autoDialPeerRetryThreshold: 1000 * 120,
       autoDialConcurrency: 500,
       maxPeerAddrsToDial: 25,
-      autoDialInterval: 5000
+      autoDialInterval: 5000,
+      ...extraConfig // Добавляем дополнительные параметры, если переданы
     }
   }
-  return config
+}
+
+export async function getDefaultClientConfig(
+  privateKey: string
+): Promise<OceanNodeConfig> {
+  return await createOceanNodeConfig(privateKey)
+}
+
+export async function getDefaultServerConfig(
+  privateKey: string
+): Promise<OceanNodeConfig> {
+  return await createOceanNodeConfig(privateKey)
 }

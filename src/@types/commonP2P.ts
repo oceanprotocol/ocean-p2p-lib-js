@@ -1,3 +1,5 @@
+import { dhtFilterMethod } from './serverP2P'
+
 export interface CommonOceanNodeP2PConfig {
   bootstrapNodes: string[]
   enableIPV4: boolean
@@ -28,6 +30,10 @@ export interface CommonOceanNodeP2PConfig {
   autoDialConcurrency: number
   maxPeerAddrsToDial: number
   autoDialInterval: number
+  bootstrapTimeout: number
+  bootstrapTagName: string
+  bootstrapTagValue: number
+  bootstrapTTL: number
 }
 export interface OceanNodeKeys {
   peerId: any
@@ -36,7 +42,10 @@ export interface OceanNodeKeys {
   ethAddress: string
 }
 export interface OceanNodeP2PClientConfig extends CommonOceanNodeP2PConfig {}
+export interface OceanNodeP2PServerConfig extends CommonOceanNodeP2PConfig {
+  dhtFilter: dhtFilterMethod
+}
 export interface OceanNodeConfig {
   keys: OceanNodeKeys
-  p2pConfig: OceanNodeP2PClientConfig | null
+  p2pConfig: OceanNodeP2PClientConfig | OceanNodeP2PServerConfig | null
 }
